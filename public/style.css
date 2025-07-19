@@ -1,0 +1,22 @@
+body {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+#board {
+  margin: auto;
+  width: 360px;
+  height: 360px;
+  display: grid;
+  grid-template-columns: repeat(9, 40px);
+  grid-template-rows: repeat(9, 40px);
+  border: 2px solid black;
+}
+
+#board div {
+  border: 1px solid #aaa;
+  line-height: 40px;
+  font-size: 20px;
+  cursor: pointer;
+  user-select: none;
+}
