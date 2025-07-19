@@ -28,3 +28,7 @@ button:disabled {
   margin-right: 10px;
   margin-bottom: 5px;
 }
+#opponentBattleField {
+  margin-top: 20px;
+  font-weight: bold;
+}

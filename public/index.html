@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>オンラインカードバトル</title>
+<title>ポケモン風カード対戦</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<h1>オンラインカードバトル</h1>
+<h1>ポケモン風カード対戦</h1>
 
 <div id="phase">
   <button id="btnDraw">ガチャを引く（5枚）</button>
@@ -15,7 +15,7 @@
 </div>
 
 <div id="deckSection" style="display:none;">
-  <h2>編成してください（5枚選択）</h2>
+  <h2>編成してください（20枚選択）</h2>
   <div id="deckPool"></div>
   <button id="btnStart">対戦開始</button>
 </div>
@@ -24,6 +24,7 @@
   <h2>対戦中</h2>
   <div id="status"></div>
   <div id="battleField"></div>
+  <div id="opponentBattleField"></div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
