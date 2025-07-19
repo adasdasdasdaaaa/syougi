@@ -1,22 +1,30 @@
 body {
   font-family: sans-serif;
-  text-align: center;
+  margin: 20px;
 }
-
-#board {
-  margin: auto;
-  width: 360px;
-  height: 360px;
-  display: grid;
-  grid-template-columns: repeat(9, 40px);
-  grid-template-rows: repeat(9, 40px);
-  border: 2px solid black;
+h1, h2 {
+  margin-bottom: 10px;
 }
-
-#board div {
-  border: 1px solid #aaa;
-  line-height: 40px;
-  font-size: 20px;
+#hand, #deckPool {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.card {
+  border: 1px solid #888;
+  padding: 10px;
+  width: 140px;
   cursor: pointer;
   user-select: none;
+}
+.card.selected {
+  background-color: #d4f0d4;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+#battleField button {
+  margin-right: 10px;
+  margin-bottom: 5px;
 }

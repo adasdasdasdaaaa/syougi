@@ -1,5 +1,5 @@
 {
-  "name": "shogi-online",
+  "name": "card-battle-online",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {

@@ -1,81 +1,105 @@
 const socket = io();
-const roomId = prompt("ルームIDを入力または作成:");
-socket.emit("joinRoom", roomId);
 
-const board = document.getElementById("board");
-let selected = null;
-let boardState = [];
+let hand = [];
+let deck = [];
+let yourTurn = false;
 
-// 初期化（9x9に歩だけ置く簡易盤面）
-function initBoard() {
-  board.innerHTML = "";
-  boardState = [];
+const btnDraw = document.getElementById('btnDraw');
+const handDiv = document.getElementById('hand');
+const deckSection = document.getElementById('deckSection');
+const deckPool = document.getElementById('deckPool');
+const btnStart = document.getElementById('btnStart');
+const phaseDiv = document.getElementById('phase');
+const gameSection = document.getElementById('gameSection');
+const statusDiv = document.getElementById('status');
+const battleField = document.getElementById('battleField');
 
-  for (let y = 0; y < 9; y++) {
-    const row = [];
-    for (let x = 0; x < 9; x++) {
-      const cell = document.createElement("div");
-      if (y === 2) {
-        cell.textContent = "歩";
-        cell.dataset.piece = "歩";
-        cell.dataset.color = "black";
-      } else if (y === 6) {
-        cell.textContent = "歩";
-        cell.dataset.piece = "歩";
-        cell.dataset.color = "white";
-      }
+btnDraw.onclick = () => {
+  socket.emit('drawCards', 5);
+  btnDraw.disabled = true;
+};
 
-      cell.dataset.x = x;
-      cell.dataset.y = y;
-
-      cell.addEventListener("click", () => handleClick(cell));
-      board.appendChild(cell);
-      row.push(cell);
-    }
-    boardState.push(row);
-  }
-}
-
-function handleClick(cell) {
-  if (selected) {
-    // 移動処理
-    const from = { x: parseInt(selected.dataset.x), y: parseInt(selected.dataset.y) };
-    const to = { x: parseInt(cell.dataset.x), y: parseInt(cell.dataset.y) };
-    const piece = selected.dataset.piece;
-    const color = selected.dataset.color;
-
-    if (isLegalMove(from, to, piece, boardState, color)) {
-      cell.textContent = piece;
-      cell.dataset.piece = piece;
-      cell.dataset.color = color;
-
-      selected.textContent = "";
-      delete selected.dataset.piece;
-      delete selected.dataset.color;
-
-      socket.emit("move", { roomId, from, to, piece });
-    }
-
-    selected = null;
-  } else if (cell.dataset.piece) {
-    selected = cell;
-  }
-}
-
-socket.on("startGame", () => {
-  alert("対戦開始！");
-  initBoard();
+socket.on('cardPool', (cards) => {
+  // カードプールは編成で使う
+  window.cardPool = cards;
 });
 
-socket.on("opponentMove", ({ from, to, piece }) => {
-  const fromCell = boardState[from.y][from.x];
-  const toCell = boardState[to.y][to.x];
+socket.on('handUpdated', (cards) => {
+  hand = cards;
+  showHand();
+  phaseDiv.style.display = 'none';
+  deckSection.style.display = 'block';
+});
 
-  toCell.textContent = piece;
-  toCell.dataset.piece = piece;
-  toCell.dataset.color = fromCell.dataset.color;
+function showHand() {
+  handDiv.innerHTML = '';
+  hand.forEach(card => {
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'card';
+    cardDiv.textContent = `${card.name} (HP:${card.hp} 攻:${card.attack})`;
+    cardDiv.onclick = () => {
+      if (deck.length < 5 && !deck.find(c => c.id === card.id)) {
+        deck.push(card);
+        updateDeckPool();
+      }
+    };
+    handDiv.appendChild(cardDiv);
+  });
+}
 
-  fromCell.textContent = "";
-  delete fromCell.dataset.piece;
-  delete fromCell.dataset.color;
+function updateDeckPool() {
+  deckPool.innerHTML = '';
+  deck.forEach(card => {
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'card selected';
+    cardDiv.textContent = `${card.name} (HP:${card.hp} 攻:${card.attack})`;
+    cardDiv.onclick = () => {
+      deck = deck.filter(c => c.id !== card.id);
+      updateDeckPool();
+    };
+    deckPool.appendChild(cardDiv);
+  });
+  btnStart.disabled = deck.length !== 5;
+}
+
+btnStart.onclick = () => {
+  socket.emit('setDeck', deck.map(c => c.id));
+  deckSection.style.display = 'none';
+  gameSection.style.display = 'block';
+  statusDiv.textContent = '対戦相手を探しています...';
+};
+
+socket.on('waiting', (msg) => {
+  statusDiv.textContent = msg;
+});
+
+socket.on('matchStart', (data) => {
+  yourTurn = data.yourTurn;
+  statusDiv.textContent = yourTurn ? 'あなたのターンです。カードを選んで攻撃！' : '相手のターンです。待ってください。';
+  battleField.innerHTML = '';
+  deck.forEach(card => {
+    const cardBtn = document.createElement('button');
+    cardBtn.textContent = `${card.name} (攻:${card.attack})`;
+    cardBtn.disabled = !yourTurn;
+    cardBtn.onclick = () => {
+      if (!yourTurn) return;
+      socket.emit('attack', card.id);
+    };
+    battleField.appendChild(cardBtn);
+  });
+});
+
+socket.on('gameUpdate', (data) => {
+  yourTurn = data.turn;
+  statusDiv.textContent = `あなたのHP: ${data.yourHp} | 相手のHP: ${data.opponentHp}` + (yourTurn ? ' あなたのターンです。' : ' 相手のターンです。');
+  [...battleField.children].forEach(btn => btn.disabled = !yourTurn);
+});
+
+socket.on('gameOver', (data) => {
+  if (data.winner) {
+    alert('あなたの勝ちです！');
+  } else {
+    alert('あなたの負けです...');
+  }
+  location.reload();
 });

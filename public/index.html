@@ -1,16 +1,32 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>将棋オンライン</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>オンラインカードバトル</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>将棋オンライン</h1>
-  <div id="board"></div>
+<h1>オンラインカードバトル</h1>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="shogi-core.js"></script>
-  <script src="client.js"></script>
+<div id="phase">
+  <button id="btnDraw">ガチャを引く（5枚）</button>
+  <div id="hand"></div>
+</div>
+
+<div id="deckSection" style="display:none;">
+  <h2>編成してください（5枚選択）</h2>
+  <div id="deckPool"></div>
+  <button id="btnStart">対戦開始</button>
+</div>
+
+<div id="gameSection" style="display:none;">
+  <h2>対戦中</h2>
+  <div id="status"></div>
+  <div id="battleField"></div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
 </body>
 </html>
